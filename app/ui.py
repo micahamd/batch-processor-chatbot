@@ -24,24 +24,34 @@ class ChatbotUI(QMainWindow):
 
         # Aesthetics
         self.setStyleSheet("""
-            QMainWindow {background-color: #f0f0f0;}
+            QMainWindow {background-color: #f0f0f0;} /* Lighter background for the main window */
             QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                border: none;
+                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #E0E0E0, stop:1 #FFFFFF);
+                color: #333;
+                border: 1px solid #aaa;
                 padding: 10px;
                 border-radius: 5px;
                 font-weight: bold;
+                text-transform: uppercase;
             }
-            QPushButton:hover {background-color: #45a049;}
+            QPushButton:hover {
+                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #FFFFFF, stop:1 #E0E0E0);
+                border-color: #ccc;
+            }
             QComboBox {
-                border: 1px solid #ccc;
+                background-color: #fff;
+                color: #333;
+                border: 1px solid #aaa;
                 border-radius: 3px;
                 padding: 5px;
+                min-width: 6em;
             }
             QTextEdit, QScrollArea {
-                border: 1px solid #ccc;
+                background-color: #fff;
+                color: #333;
+                border: 1px solid #aaa;
                 border-radius: 3px;
+                padding: 2px;
             }
         """)
 
@@ -79,6 +89,14 @@ class ChatbotUI(QMainWindow):
         self.process_button = QPushButton("Process")
         self.process_button.clicked.connect(self.process_request)
         layout.addWidget(self.process_button)
+
+        # Processing label
+        self.processing_label = QLabel("Processing...")
+        self.processing_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.processing_label.setStyleSheet("font-weight: bold; color: #4CAF50; min-height: 30px;")
+        self.processing_label.setMinimumHeight(30)  # Set a minimum height for the label
+        self.processing_label.hide()
+        layout.addWidget(self.processing_label)
 
         # Progress bar
         self.progress_bar = QProgressBar()
@@ -140,6 +158,8 @@ class ChatbotUI(QMainWindow):
             self.append_to_output("Please provide a prompt")
             return
     
+        self.processing_label.show() # Show the label
+
         chat_history = self.chat_history if self.include_history_checkbox.isChecked() else None
     
         if self.selected_directory and self.directory_files:
@@ -163,6 +183,7 @@ class ChatbotUI(QMainWindow):
             result = process_request(developer, model, prompt, None, chat_history)
             self.handle_result(result)
     
+        self.processing_label.hide() # Hide the label
         self.progress_bar.setVisible(False)
 
     def handle_result(self, result):

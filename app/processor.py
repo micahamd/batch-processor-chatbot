@@ -78,7 +78,7 @@ def process_chatgpt(model, prompt, file_path, chat_history=None):
             response = client.images.generate(
                 model=model,
                 prompt=messages[-1]["content"],
-                size="512x512",
+                size = "512x512" if model == "dall-e-2" else "1024x1024",  # Default for DALL-E 3
                 quality="standard",
                 n=1,
             )
