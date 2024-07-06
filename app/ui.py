@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import QCheckBox
 from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtCore import Qt, QByteArray, QBuffer
 from io import BytesIO
+from html import escape
 import base64
 from PIL import Image
 from app.processor import process_request
@@ -24,7 +25,10 @@ class ChatbotUI(QMainWindow):
 
         # Aesthetics
         self.setStyleSheet("""
-            QMainWindow {background-color: #f0f0f0;} /* Lighter background for the main window */
+            QMainWindow {
+                background-color: #f0f0f0; /* Lighter background for the main window */
+                font-family: 'Segoe UI'; /* Modern font */
+            }
             QPushButton {
                 background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #E0E0E0, stop:1 #FFFFFF);
                 color: #333;
@@ -33,10 +37,16 @@ class ChatbotUI(QMainWindow):
                 border-radius: 5px;
                 font-weight: bold;
                 text-transform: uppercase;
+                box-shadow: 1px 1px 5px rgba(0,0,0,0.2); /* Subtle shadow */
             }
             QPushButton:hover {
                 background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #FFFFFF, stop:1 #E0E0E0);
-                border-color: #ccc;
+                border-color: #888;
+                box-shadow: 1px 1px 5px rgba(0,0,0,0.3); /* More pronounced shadow on hover */
+            }
+            QPushButton:pressed {
+                background-color: #E0E0E0;
+                box-shadow: inset 1px 1px 5px rgba(0,0,0,0.2); /* Inset shadow for pressed state */
             }
             QComboBox {
                 background-color: #fff;
@@ -45,13 +55,15 @@ class ChatbotUI(QMainWindow):
                 border-radius: 3px;
                 padding: 5px;
                 min-width: 6em;
+                font-family: 'Segoe UI'; /* Consistent font */
             }
             QTextEdit, QScrollArea {
                 background-color: #fff;
                 color: #333;
                 border: 1px solid #aaa;
                 border-radius: 3px;
-                padding: 2px;
+                padding: 5px; /* Slightly increased padding for better text visibility */
+                font-family: 'Segoe UI'; /* Consistent font */
             }
         """)
 
@@ -159,7 +171,6 @@ class ChatbotUI(QMainWindow):
             return
     
         self.processing_label.show() # Show the label
-
         chat_history = self.chat_history if self.include_history_checkbox.isChecked() else None
     
         if self.selected_directory and self.directory_files:
@@ -265,17 +276,16 @@ class ChatbotUI(QMainWindow):
                 scaled_pixmap.save(buffer, "PNG")
                 image_data = buffer.data().toBase64()
                 output += f'<img src="data:image/png;base64,{image_data.data().decode()}" />\n\n---\n\n'
-    
+
     def save_output(self):
         if self.output_layout.count() == 0:
             QMessageBox.warning(self, "No Content", "There's no content to save.")
             return
-
+    
         file_path, _ = QFileDialog.getSaveFileName(self, "Save Output", "", 
                                                    "HTML Files (*.html);;All Files (*)")
         if not file_path:
             return  # User cancelled the save dialog
-
         html_content = self.get_html_output()
         try:
             with open(file_path, 'w', encoding='utf-8') as f:
@@ -285,18 +295,116 @@ class ChatbotUI(QMainWindow):
             QMessageBox.critical(self, "Save Failed", f"Failed to save output: {str(e)}")
 
     def get_html_output(self):
-        html_parts = ['<html><body>']
+        css = """
+        <style>
+            :root {
+                --primary-color: #3498db;
+                --background-color: #f0f4f8;
+                --text-color: #333;
+                --item-background: #ffffff;
+                --shadow-color: rgba(0, 0, 0, 0.1);
+            }
+        
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: var(--text-color);
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: var(--background-color);
+            }
+        
+            h1 {
+                color: var(--primary-color);
+                text-align: center;
+                margin-bottom: 30px;
+                font-size: 2.5em;
+                border-bottom: 2px solid var(--primary-color);
+                padding-bottom: 10px;
+            }
+        
+            .conversation-item {
+                background-color: var(--item-background);
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 25px;
+                transition: transform 0.2s ease-in-out;
+            }
+        
+            .conversation-item:hover {
+                transform: translateY(-5px);
+            }
+        
+            .conversation-item p {
+                margin: 0;
+                font-size: 1.1em;
+            }
+        
+            .conversation-item img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 8px;
+                margin-top: 15px;
+            }
+        
+            .separator {
+                border: none;
+                height: 1px;
+                background-color: var(--primary-color);
+                margin: 30px 0;
+                opacity: 0.2;
+            }
+        
+            @media (max-width: 600px) {
+                body {
+                    padding: 10px;
+                }
+        
+                h1 {
+                    font-size: 2em;
+                }
+        
+                .conversation-item {
+                    padding: 15px;
+                }
+            }
+        </style>
+        """
+        
+        html_parts = [
+            '<!DOCTYPE html>',
+            '<html lang="en">',
+            '<head>',
+            '<meta charset="UTF-8">',
+            '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+            '<title>Conversation history</title>',
+            css,
+            '</head>',
+            '<body>',
+            '<h1>Conversation history</h1>'
+        ]
+        
         for item_type, item_content in self.chat_history:
+            html_parts.append('<div class="conversation-item">')
             if item_type == "text":
-                html_parts.append(f'<p>{item_content}</p>')
+                html_parts.append(f'<p>{escape(item_content)}</p>')
             elif item_type == "image":
-                buffer = BytesIO()
-                item_content.save(buffer, format="PNG")
-                img_base64 = base64.b64encode(buffer.getvalue()).decode()
-                html_parts.append(f'<img src="data:image/png;base64,{img_base64}" />')
-            html_parts.append('<hr>')
+                # Assume item_content is already a base64 encoded string
+                if isinstance(item_content, str):
+                    img_base64 = item_content
+                else:
+                    # If it's not a string, assume it's a PIL Image object
+                    buffer = BytesIO()
+                    item_content.save(buffer, format="PNG")
+                    img_base64 = base64.b64encode(buffer.getvalue()).decode()
+                html_parts.append(f'<img src="data:image/png;base64,{img_base64}" alt="Conversation Image">')
+            html_parts.append('</div>')
+            html_parts.append('<hr class="separator">')
+        
         html_parts.append('</body></html>')
         return '\n'.join(html_parts)
+
 
     def clear_output(self):
         for i in reversed(range(self.output_layout.count())): 
