@@ -62,11 +62,16 @@ def read_pdf_document(file_path):
             xref = img[0]
             base_image = doc.extract_image(xref)
             image_bytes = base_image["image"]
-            image = Image.open(BytesIO(image_bytes))
-            buffered = BytesIO()
-            image.save(buffered, format="PNG")
-            img_str = base64.b64encode(buffered.getvalue()).decode()
-            images.append(img_str)
+            try:
+                image = Image.open(BytesIO(image_bytes))
+                if image.mode == 'CMYK':
+                    image = image.convert('RGB')
+                buffered = BytesIO()
+                image.save(buffered, format="PNG")
+                img_str = base64.b64encode(buffered.getvalue()).decode()
+                images.append(img_str)
+            except Exception as e:
+                print(f"Error processing image in PDF: {str(e)}")
 
     return "\n".join(content), images
 
