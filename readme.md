@@ -77,7 +77,7 @@ python main.py
 
 - For single/multiple files that you want to input, create a directory and direct the agent there.
 - When processing documents, ask specific questions about the content, e.g., "Summarize the main points of this report."
-- Experiment with different AI models for various tasks. I find Claude to be eloquent, and GPT good for a second opinion alongside image generation. However , Gemini's context window is unmatched, and ideal for batch processing large documents.
+- Experiment with different AI models for your workflow. As of July 7, 2024, Claude is the most eloquent and code-savvy, and GPT is good for image generation and audio transcription. For large PDFs, Gemini's context window is unmatched.
 - Use the chat history feature for more context-aware conversations.
 
 ## 📄 License
