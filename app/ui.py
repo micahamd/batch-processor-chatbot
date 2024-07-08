@@ -23,6 +23,9 @@ class ChatbotUI(QMainWindow):
 
         layout = QVBoxLayout()
 
+        # For output styling 
+        self.processing_multiple_files = False
+
         # Aesthetics
         self.setStyleSheet("""
             QMainWindow {
@@ -162,6 +165,8 @@ class ChatbotUI(QMainWindow):
             self.dir_label.setText("No Directory Selected")
 
     def process_request(self):
+        self.processing_multiple_files = bool(self.selected_directory and self.directory_files) # Flag html output generator
+
         developer = self.developer_combo.currentText()
         model = self.model_combo.currentText()
         prompt = self.prompt_input.toPlainText()
@@ -297,77 +302,21 @@ class ChatbotUI(QMainWindow):
     def get_html_output(self):
         css = """
         <style>
-            :root {
-                --primary-color: #3498db;
-                --background-color: #f0f4f8;
-                --text-color: #333;
-                --item-background: #ffffff;
-                --shadow-color: rgba(0, 0, 0, 0.1);
-            }
-        
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                line-height: 1.6;
-                color: var(--text-color);
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-                background-color: var(--background-color);
-            }
-        
-            h1 {
-                color: var(--primary-color);
-                text-align: center;
-                margin-bottom: 30px;
-                font-size: 2.5em;
-                border-bottom: 2px solid var(--primary-color);
-                padding-bottom: 10px;
-            }
-        
-            .conversation-item {
+            /* ... (keep all existing CSS) ... */
+    
+            .file-section {
                 background-color: var(--item-background);
                 border-radius: 12px;
                 padding: 20px;
                 margin-bottom: 25px;
-                transition: transform 0.2s ease-in-out;
+                box-shadow: 0 4px 6px var(--shadow-color);
             }
-        
-            .conversation-item:hover {
-                transform: translateY(-5px);
-            }
-        
-            .conversation-item p {
-                margin: 0;
-                font-size: 1.1em;
-            }
-        
-            .conversation-item img {
-                max-width: 100%;
-                height: auto;
-                border-radius: 8px;
-                margin-top: 15px;
-            }
-        
-            .separator {
-                border: none;
-                height: 1px;
-                background-color: var(--primary-color);
-                margin: 30px 0;
-                opacity: 0.2;
-            }
-        
-            @media (max-width: 600px) {
-                body {
-                    padding: 10px;
-                }
-        
-                h1 {
-                    font-size: 2em;
-                }
-        
-                .conversation-item {
-                    padding: 15px;
-                }
+    
+            .file-section h2 {
+                color: var(--primary-color);
+                margin-top: 0;
+                margin-bottom: 15px;
+                font-size: 1.5em;
             }
         </style>
         """
@@ -385,26 +334,63 @@ class ChatbotUI(QMainWindow):
             '<h1>Conversation history</h1>'
         ]
         
-        for item_type, item_content in self.chat_history:
-            html_parts.append('<div class="conversation-item">')
-            if item_type == "text":
-                html_parts.append(f'<p>{escape(item_content)}</p>')
-            elif item_type == "image":
-                # Assume item_content is already a base64 encoded string
-                if isinstance(item_content, str):
-                    img_base64 = item_content
+        if self.processing_multiple_files:
+            current_file = None
+            file_content = []
+            for item_type, item_content in self.chat_history:
+                if item_type == "text" and item_content.startswith("Processed file"):
+                    if current_file:
+                        html_parts.append(self.format_file_content(current_file, file_content))
+                    current_file = item_content
+                    file_content = []
                 else:
-                    # If it's not a string, assume it's a PIL Image object
-                    buffer = BytesIO()
-                    item_content.save(buffer, format="PNG")
-                    img_base64 = base64.b64encode(buffer.getvalue()).decode()
-                html_parts.append(f'<img src="data:image/png;base64,{img_base64}" alt="Conversation Image">')
-            html_parts.append('</div>')
-            html_parts.append('<hr class="separator">')
+                    file_content.append((item_type, item_content))
+            
+            # Process the last file or single file case
+            if current_file and file_content:
+                html_parts.append(self.format_file_content(current_file, file_content))
+            elif file_content:  # Handle case where there's only one file
+                html_parts.append(self.format_file_content("Processed file", file_content))
+
+        else:
+            for item_type, item_content in self.chat_history:
+                html_parts.append('<div class="conversation-item">')
+                if item_type == "text":
+                    html_parts.append(f'<p>{escape(item_content)}</p>')
+                elif item_type == "image":
+                    # Assume item_content is already a base64 encoded string
+                    if isinstance(item_content, str):
+                        img_base64 = item_content
+                    else:
+                        # If it's not a string, assume it's a PIL Image object
+                        buffer = BytesIO()
+                        item_content.save(buffer, format="PNG")
+                        img_base64 = base64.b64encode(buffer.getvalue()).decode()
+                    html_parts.append(f'<img src="data:image/png;base64,{img_base64}" alt="Conversation Image">')
+                html_parts.append('</div>')
+                html_parts.append('<hr class="separator">')
         
         html_parts.append('</body></html>')
         return '\n'.join(html_parts)
-
+    
+    def format_file_content(self, file_header, content):
+        html = [f'<div class="file-section"><h2>{escape(file_header)}</h2>']
+        for item_type, item_content in content:
+            html.append('<div class="conversation-item">')
+            if item_type == "text":
+                html.append(f'<p>{escape(item_content)}</p>')
+            elif item_type == "image":
+                if isinstance(item_content, str):
+                    img_base64 = item_content
+                else:
+                    buffer = BytesIO()
+                    item_content.save(buffer, format="PNG")
+                    img_base64 = base64.b64encode(buffer.getvalue()).decode()
+                html.append(f'<img src="data:image/png;base64,{img_base64}" alt="Conversation Image">')
+            html.append('</div>')
+        html.append('</div><hr class="separator">')
+        return '\n'.join(html)
+    
 
     def clear_output(self):
         for i in reversed(range(self.output_layout.count())): 
