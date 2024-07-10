@@ -218,11 +218,11 @@ class ChatbotUI(QMainWindow):
 
     def get_history_prompt(self):
         history_parts = []
-        for item_type, item_content in self.chat_history:
+        for item_type, content, _ in self.chat_history:
             if item_type == "text":
-                history_parts.append(item_content)
+                history_parts.append(content)
             elif item_type == "image":
-                history_parts.append(f"[An image was shared in the conversation. Base64: {item_content[:20]}...]")
+                history_parts.append(f"[An image was shared in the conversation. Base64: {content[:20]}...]")
         return "\n".join(history_parts)
 
     def append_to_output(self, text):
@@ -233,8 +233,9 @@ class ChatbotUI(QMainWindow):
         self.output_layout.addWidget(label)
         self.output_layout.addWidget(QLabel("---"))
         
-        # Store the text content
-        self.chat_history.append(("text", text))
+        # Store the text content with formatting information
+        formatted_text = text.replace('\n', '<br>')  # Preserve line breaks
+        self.chat_history.append(("text", formatted_text))
 
     def append_image_to_output(self, image):
         q_image = self.pil_to_qimage(image)
@@ -291,6 +292,7 @@ class ChatbotUI(QMainWindow):
                                                    "HTML Files (*.html);;All Files (*)")
         if not file_path:
             return  # User cancelled the save dialog
+        
         html_content = self.get_html_output()
         try:
             with open(file_path, 'w', encoding='utf-8') as f:
@@ -302,21 +304,31 @@ class ChatbotUI(QMainWindow):
     def get_html_output(self):
         css = """
         <style>
-            /* ... (keep all existing CSS) ... */
-    
-            .file-section {
-                background-color: var(--item-background);
-                border-radius: 12px;
+            body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 800px;
+                margin: 0 auto;
                 padding: 20px;
-                margin-bottom: 25px;
-                box-shadow: 0 4px 6px var(--shadow-color);
+                background-color: #f0f0f0;
             }
-    
-            .file-section h2 {
-                color: var(--primary-color);
-                margin-top: 0;
-                margin-bottom: 15px;
-                font-size: 1.5em;
+            .chat-item {
+                margin-bottom: 20px;
+                padding: 10px;
+                border-radius: 5px;
+                background-color: #fff;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            }
+            .chat-item img {
+                max-width: 100%;
+                height: auto;
+                margin-top: 10px;
+            }
+            .separator {
+                border: none;
+                border-top: 1px solid #ddd;
+                margin: 20px 0;
             }
         </style>
         """
@@ -327,52 +339,25 @@ class ChatbotUI(QMainWindow):
             '<head>',
             '<meta charset="UTF-8">',
             '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-            '<title>Conversation history</title>',
+            '<title>Conversation History</title>',
             css,
             '</head>',
             '<body>',
-            '<h1>Conversation history</h1>'
+            '<h1>Conversation History</h1>'
         ]
         
-        if self.processing_multiple_files:
-            current_file = None
-            file_content = []
-            for item_type, item_content in self.chat_history:
-                if item_type == "text" and item_content.startswith("Processed file"):
-                    if current_file:
-                        html_parts.append(self.format_file_content(current_file, file_content))
-                    current_file = item_content
-                    file_content = []
-                else:
-                    file_content.append((item_type, item_content))
-            
-            # Process the last file or single file case
-            if current_file and file_content:
-                html_parts.append(self.format_file_content(current_file, file_content))
-            elif file_content:  # Handle case where there's only one file
-                html_parts.append(self.format_file_content("Processed file", file_content))
-
-        else:
-            for item_type, item_content in self.chat_history:
-                html_parts.append('<div class="conversation-item">')
-                if item_type == "text":
-                    html_parts.append(f'<p>{escape(item_content)}</p>')
-                elif item_type == "image":
-                    # Assume item_content is already a base64 encoded string
-                    if isinstance(item_content, str):
-                        img_base64 = item_content
-                    else:
-                        # If it's not a string, assume it's a PIL Image object
-                        buffer = BytesIO()
-                        item_content.save(buffer, format="PNG")
-                        img_base64 = base64.b64encode(buffer.getvalue()).decode()
-                    html_parts.append(f'<img src="data:image/png;base64,{img_base64}" alt="Conversation Image">')
-                html_parts.append('</div>')
-                html_parts.append('<hr class="separator">')
+        for item_type, content in self.chat_history:
+            html_parts.append('<div class="chat-item">')
+            if item_type == "text":
+                # Use the stored formatted text directly
+                html_parts.append(f'<p>{content}</p>')
+            elif item_type == "image":
+                html_parts.append(f'<img src="data:image/png;base64,{content}" alt="Conversation Image">')
+            html_parts.append('</div>')
         
         html_parts.append('</body></html>')
         return '\n'.join(html_parts)
-    
+
     def format_file_content(self, file_header, content):
         html = [f'<div class="file-section"><h2>{escape(file_header)}</h2>']
         for item_type, item_content in content:
@@ -390,8 +375,8 @@ class ChatbotUI(QMainWindow):
             html.append('</div>')
         html.append('</div><hr class="separator">')
         return '\n'.join(html)
-    
-
+   
     def clear_output(self):
-        for i in reversed(range(self.output_layout.count())): 
-            self.output_layout.itemAt(i).widget().setParent(None)
+            for i in reversed(range(self.output_layout.count())): 
+                self.output_layout.itemAt(i).widget().setParent(None)
+            self.chat_history.clear()  # Clear the chat history when clearing the output
