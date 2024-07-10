@@ -1,13 +1,12 @@
 # 🚀 Multimodal Chatbot
 
-A Multimodal Chatbot capable of utilizing models from ChatGPT, Claude, and Gemini in a single interface. The model processes text, images (with vision-capable models), documents, and audio (with whisper-1 only). Manually include/exclude your chat history and batch process multiple files in a specified directory. 
+A Multimodal Chatbot capable of deploying models from ChatGPT, Claude, and Gemini in a single interface. The model can process text, images (with vision-capable models), documents, and audio (with whisper-1 only), and generate text and images (using Dall-E). You can additionally batch process multiple files with a given prompt, and save the output in HTML. 
 
 ## 🌟 Features
 
-- 🤖 Implements ChatGPT, Claude, and Gemini models at present
-- 📄 Support for various file types (DOCX, PDF, PPT, images, spreadsheets, audio)
-- 🖼️ Image processing and analysis
-- 📁 Batch processing of files in a directory
+- 🤖 Implements ChatGPT, Claude, and Gemini models (at present)
+- 📄 Support for various document file types (DOCX, PDF, PPT), images, spreadsheets (XLS, CSV), audio
+- 📁 Batch processing multiple files from a user-provided directory
 - 💬 Chat history integration
 - 💾 Save conversations as HTML
 
@@ -48,21 +47,21 @@ python main.py
 ## 🎯 How to Interact with the Agent
 
 1. **Select AI Model**: 
-   - Choose your preferred AI (ChatGPT, Claude, or Gemini) from the dropdown menu.
-   - Select the specific model version. These can be modified in the 'processor.py' file.
+   - Choose the developer (ChatGPT, Claude, or Gemini) from the dropdown menu. Then choose the specific model version. These can be updated directly in the 'processor.py' file.
 
 2. **Enter Your Prompt**:
    - Type your question or instruction in the text box, as you would in a conventional chatbot UI.
 
 3. **Include Chat History**:
-   - Check the "Include Chat History?" box if you want the AI to consider previous interactions during subsequent responses. This can include images generated from DALL-E.
+   - Check the "Include Chat History?" box if you want the chatbot to consider previous interactions (involving text/images) displayed in the chatbox. Note that the latter *only* records the agent's responses, and your earlier instructions will not be taken into consideration. 
 
 4. **Process Files**:
    - Click "Toggle Directory" to select a folder of files to process.
-   - The agent has been tested to handle PDFs, Word documents, and images in the current iteration.
+   - The agent has been tested on complex PDFs, Word documents, and images in the current iteration. 
+   - *Caution* Be aware of token limits when processing complex PDFs with several images.
 
 5. **Start Processing**:
-   - Hit the "Process" button to send your request to the AI. *DO NOT* interact with the application while its processing your request as it runs on your main thread for security purposes.
+   - Hit the "Process" button to send your request to the selected AI. *DO NOT* interact with the application while its processing your request as it runs on your main thread for security reasons. The speed of the response is contingent on the quality of your internet connection. 
 
 6. **Review Output**:
    - Scroll through the chat window to see the AI's responses. Any images will be displayed inline with the text.
@@ -77,7 +76,7 @@ python main.py
 
 - For single/multiple files that you want to input, create a directory and direct the agent there.
 - When processing documents, ask specific questions about the content, e.g., "Summarize the main points of this report."
-- Experiment with different AI models for your workflow. As of July 7, 2024, Claude is the most eloquent and code-savvy, and GPT is good for image generation and audio transcription. For large PDFs, Gemini's context window is unmatched.
+- Experiment with different AI models for your workflow. As of July 7, 2024, Claude 3.5 appears useful for most use cases, GPT is good for image generation and audio transcription, and Gemini for its immense context window. 
 - Use the chat history feature for more context-aware conversations.
 
 ## 📄 License
