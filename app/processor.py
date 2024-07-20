@@ -116,7 +116,7 @@ def process_chatgpt(model, prompt, file_path, chat_history=None):
             response = client.chat.completions.create(
                 model=model,
                 messages=messages,
-                max_tokens=4000
+                max_tokens=12000
             )
             return response.choices[0].message.content.strip()
         
