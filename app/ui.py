@@ -147,7 +147,7 @@ class ChatbotUI(QMainWindow):
         self.model_combo.clear()
         developer = self.developer_combo.currentText()
         if developer == "ChatGPT":
-            self.model_combo.addItems(["gpt-3.5-turbo-16k", "gpt-4o", "dall-e-3", "dall-e-2", "whisper-1"])
+            self.model_combo.addItems(["gpt-3.5-turbo", "gpt-4o","gpt-4o-mini", "dall-e-3", "dall-e-2", "whisper-1"])
         elif developer == "Claude":
             self.model_combo.addItems(["claude-3-opus-20240229", "claude-3-5-sonnet-20240620", "claude-3-haiku-20240307"])
         elif developer == "Gemini":

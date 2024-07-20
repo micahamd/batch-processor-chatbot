@@ -70,6 +70,12 @@ def process_chatgpt(model, prompt, file_path, chat_history=None):
                 }
             ]
         })
+    elif file_path:
+        try:
+            file_content = read_file(file_path)
+            messages.append({"role": "user", "content": f"{prompt}\n\nFile content: {file_content}"})
+        except Exception as e:
+            return f"Error processing file {file_path}: {str(e)}"
     else:
         messages.append({"role": "user", "content": prompt})
 
