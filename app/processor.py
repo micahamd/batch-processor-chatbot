@@ -72,8 +72,13 @@ def process_chatgpt(model, prompt, file_path, chat_history=None):
         })
     elif file_path:
         try:
-            file_content = read_file(file_path)
-            messages.append({"role": "user", "content": f"{prompt}\n\nFile content: {file_content}"})
+            if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+                with open(file_path, "rb") as image_file:
+                    base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+                messages.append({"role": "user", "content": f"{prompt}\n\n[An image was shared. It's not directly viewable in this context.]"})
+            else:
+                file_content = read_file(file_path)
+                messages.append({"role": "user", "content": f"{prompt}\n\nFile content: {file_content}"})
         except Exception as e:
             return f"Error processing file {file_path}: {str(e)}"
     else:

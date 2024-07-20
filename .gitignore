@@ -29,3 +29,6 @@ Thumbs.db
 
 # Test file
 test.py
+
+# Prompt file
+prompt_list.txt
