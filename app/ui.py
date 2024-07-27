@@ -40,16 +40,13 @@ class ChatbotUI(QMainWindow):
                 border-radius: 5px;
                 font-weight: bold;
                 text-transform: uppercase;
-                box-shadow: 1px 1px 5px rgba(0,0,0,0.2); /* Subtle shadow */
             }
             QPushButton:hover {
                 background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #FFFFFF, stop:1 #E0E0E0);
                 border-color: #888;
-                box-shadow: 1px 1px 5px rgba(0,0,0,0.3); /* More pronounced shadow on hover */
             }
             QPushButton:pressed {
                 background-color: #E0E0E0;
-                box-shadow: inset 1px 1px 5px rgba(0,0,0,0.2); /* Inset shadow for pressed state */
             }
             QComboBox {
                 background-color: #fff;
@@ -91,9 +88,19 @@ class ChatbotUI(QMainWindow):
         self.include_history_checkbox = QCheckBox("Include Chat History?")
         layout.addWidget(self.include_history_checkbox)
 
+        # Add context directory
+        self.add_context_checkbox = QCheckBox("Add Context")
+        self.add_context_checkbox.stateChanged.connect(self.toggle_context_button)
+        layout.addWidget(self.add_context_checkbox)
+        
+        self.context_button = QPushButton("Context Directory")
+        self.context_button.clicked.connect(self.select_context_directory)
+        self.context_button.setVisible(False)
+        layout.addWidget(self.context_button)
+
         # Directory selection
         dir_layout = QHBoxLayout()
-        self.dir_button = QPushButton("Toggle Directory?")
+        self.dir_button = QPushButton("Batch Processing Directory")
         self.dir_button.clicked.connect(self.select_directory)
         dir_layout.addWidget(self.dir_button)
         self.dir_label = QLabel("No Directory Selected")
@@ -143,15 +150,18 @@ class ChatbotUI(QMainWindow):
         self.directory_files = []
         self.current_file_index = 0
 
+    def toggle_context_button(self, state):
+        self.context_button.setVisible(state == Qt.CheckState.Checked.value)
+
     def update_model_options(self):
         self.model_combo.clear()
         developer = self.developer_combo.currentText()
         if developer == "ChatGPT":
-            self.model_combo.addItems(["gpt-4o-mini", "dall-e-3", "dall-e-2", "whisper-1"])
+            self.model_combo.addItems(["gpt-4o-mini","gpt-4o", "dall-e-3", "dall-e-2", "whisper-1"])
         elif developer == "Claude":
-            self.model_combo.addItems(["claude-3-opus-20240229", "claude-3-5-sonnet-20240620", "claude-3-haiku-20240307"])
+            self.model_combo.addItems(["claude-3-5-sonnet-20240620", "claude-3-opus-20240229", "claude-3-haiku-20240307"])
         elif developer == "Gemini":
-            self.model_combo.addItems(["gemini-1.5-pro-001", "gemini-1.5-flash-001", "gemini-1.0-pro-vision-001"])
+            self.model_combo.addItems(["gemini-1.5-flash-001", "gemini-1.5-pro-001", "gemini-1.0-pro-vision-001"])
 
     def select_directory(self):
         self.selected_directory = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -164,6 +174,15 @@ class ChatbotUI(QMainWindow):
             self.current_file_index = 0
             self.dir_label.setText("No Directory Selected")
 
+    def select_context_directory(self):
+        self.context_directory = QFileDialog.getExistingDirectory(self, "Select Context Directory")
+        if self.context_directory:
+            self.context_files = [f for f in os.listdir(self.context_directory) if os.path.isfile(os.path.join(self.context_directory, f)) and f.lower().endswith(('.txt', '.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
+            self.context_button.setText(f"Context Directory: {len(self.context_files)} files")
+        else:
+            self.context_files = []
+            self.context_button.setText("Select Context Directory")
+        
     def process_request(self):
         self.processing_multiple_files = bool(self.selected_directory and self.directory_files) # Flag html output generator
 
@@ -177,7 +196,11 @@ class ChatbotUI(QMainWindow):
     
         self.processing_label.show() # Show the label
         chat_history = self.chat_history if self.include_history_checkbox.isChecked() else None
-    
+        
+        context_files = None
+        if self.add_context_checkbox.isChecked() and self.context_files:
+            context_files = [os.path.join(self.context_directory, f) for f in self.context_files]        
+ 
         if self.selected_directory and self.directory_files:
             self.progress_bar.setVisible(True)
             self.progress_bar.setMaximum(len(self.directory_files))
@@ -186,7 +209,7 @@ class ChatbotUI(QMainWindow):
                 current_file = os.path.join(self.selected_directory, self.directory_files[self.current_file_index])
                 self.progress_bar.setValue(self.current_file_index + 1)
                 
-                result = process_request(developer, model, prompt, current_file, chat_history)
+                result = process_request(developer, model, prompt, current_file, chat_history, context_files)
                 self.handle_result(result)
                 
                 self.append_to_output(f"Processed file {self.current_file_index + 1} of {len(self.directory_files)}: {self.directory_files[self.current_file_index]}")
@@ -196,7 +219,7 @@ class ChatbotUI(QMainWindow):
             self.progress_bar.setVisible(False)
             self.current_file_index = 0  # Reset for next use
         else:
-            result = process_request(developer, model, prompt, None, chat_history)
+            result = process_request(developer, model, prompt, None, chat_history, context_files)
             self.handle_result(result)
     
         self.processing_label.hide() # Hide the label

@@ -4,14 +4,14 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import google.generativeai as genai
 from anthropic import Anthropic
-from app.utils import read_file, encode_image
+from app.utils import read_file, encode_image, read_context_files
 import requests
 from PIL import Image
 from io import BytesIO
 
 load_dotenv()
 
-def process_request(developer, model, prompt, file_path, chat_history=None):
+def process_request(developer, model, prompt, file_path, chat_history=None, context_files=None):
     if chat_history:
         history_prompt = "\n".join([
             item_content if item_type == "text" else f"[Image: Base64 encoded, starts with {item_content[:20]}...]"
@@ -19,16 +19,20 @@ def process_request(developer, model, prompt, file_path, chat_history=None):
         ])
         prompt = f"{history_prompt}\n\nNew prompt: {prompt}"
 
+    if context_files:
+        context_content = read_context_files(context_files)
+        prompt = f"{context_content}\n\nContext:\n{prompt}"
+
     if developer == "ChatGPT":
-        return process_chatgpt(model, prompt, file_path, chat_history)
+        return process_chatgpt(model, prompt, file_path, chat_history, context_files)
     elif developer == "Claude":
-        return process_claude(model, prompt, file_path, chat_history)
+        return process_claude(model, prompt, file_path, chat_history, context_files)
     elif developer == "Gemini":
-        return process_gemini(model, prompt, file_path, chat_history)
+        return process_gemini(model, prompt, file_path, chat_history, context_files)
     else:
         return "Invalid developer selected"
 
-def process_chatgpt(model, prompt, file_path, chat_history=None):
+def process_chatgpt(model, prompt, file_path, chat_history=None, context_files=None):
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     
     messages = []
@@ -123,7 +127,7 @@ def process_chatgpt(model, prompt, file_path, chat_history=None):
         except Exception as e:
             return f"Error processing request: {str(e)}"
         
-def process_claude(model, prompt, file_path, chat_history=None):
+def process_claude(model, prompt, file_path, chat_history=None, context_files=None):
     client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     
     content = []
@@ -179,7 +183,7 @@ def process_claude(model, prompt, file_path, chat_history=None):
     except Exception as e:
         return f"Error processing request: {str(e)}"
 
-def process_gemini(model, prompt, file_path, chat_history=None):
+def process_gemini(model, prompt, file_path, chat_history=None, context_files=None):
     genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
     model = genai.GenerativeModel(model_name=model)
     

@@ -45,3 +45,12 @@ def encode_image(image_path):
     except Exception as e:
         raise IOError(f"Error encoding image {image_path}: {str(e)}")
 
+def read_context_files(file_paths):
+    context_content = []
+    for file_path in file_paths:
+        try:
+            content, _ = read_file(file_path)
+            context_content.append(f"Content of {os.path.basename(file_path)}:\n{content}\n")
+        except Exception as e:
+            context_content.append(f"Error reading {os.path.basename(file_path)}: {str(e)}\n")
+    return "\n".join(context_content)
