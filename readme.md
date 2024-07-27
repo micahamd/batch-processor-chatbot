@@ -9,6 +9,7 @@ A Multimodal Chatbot capable of deploying models from ChatGPT, Claude, and Gemin
 - 📁 Batch processing multiple files from a user-provided directory
 - 💬 Chat history integration
 - 💾 Save conversations as HTML
+- 🧠 Context-aware processing with optional context directory
 
 ## 🛠️ Installation
 
@@ -55,21 +56,26 @@ python main.py
 3. **Include Chat History**:
    - Check the "Include Chat History?" box if you want the chatbot to consider previous interactions (involving text/images) displayed in the chatbox. Note that the latter *only* records the agent's responses, and your earlier instructions will not be taken into consideration. 
 
-4. **Process Files**:
+4. **Add Context** (New Feature):
+   - Check the "Add Context" box to enable context-aware processing.
+   - Click the "Select Context Directory" button to choose a folder containing context files.
+   - The chatbot will incorporate the content of these files into its processing.
+
+5. **Process Files**:
    - Click "Toggle Directory" to select a folder of files to process.
    - The agent has been tested on complex PDFs, Word documents, and images in the current iteration. 
    - *Caution* Be aware of token limits when processing complex PDFs with several images.
 
-5. **Start Processing**:
-   - Hit the "Process" button to send your request to the selected AI. *DO NOT* interact with the application while its processing your request as it runs on your main thread for security reasons. The speed of the response is contingent on the quality of your internet connection. 
+6. **Start Processing**:
+   - Hit the "Process" button to send your request to the selected AI. *DO NOT* interact with the application while it's processing your request as it runs on your main thread for security reasons. The speed of the response is contingent on the quality of your internet connection. 
 
-6. **Review Output**:
+7. **Review Output**:
    - Scroll through the chat window to see the AI's responses. Any images will be displayed inline with the text.
 
-7. **Save Your Conversation**:
+8. **Save Your Conversation**:
    - Click "Save Output" to store the entire chat history as an HTML file.
 
-8. **Start Fresh**:
+9. **Start Fresh**:
    - Use the "Clear Window" button to reset the chat and start a new conversation.
 
 ## 💡 Usage Tips
@@ -78,8 +84,22 @@ python main.py
 - When processing documents, ask specific questions about the content, e.g., "Summarize the main points of this report."
 - Experiment with different AI models for your workflow. As of July 7, 2024, Claude 3.5 appears useful for most use cases, GPT is good for image generation and audio transcription, and Gemini for its immense context window. 
 - Use the chat history feature for more context-aware conversations.
+- Leverage the new "Add Context" feature for processing that requires additional background information.
+
+## ⚠️ Important Notes
+
+- **Token Limits**: The application currently does not have built-in token limiters. Users must be cautious about the amount of data they process, especially with large files or extensive chat histories. If you need to implement token limits, you'll need to modify the code in the 'processor.py' file for each AI service.
+- **Performance**: The application processes requests on the main thread. For large files or batch processing, expect the UI to be unresponsive until processing is complete.
+- **File Compatibility**: While the chatbot supports various file types, complex files (especially PDFs with many images) may cause issues due to token limits or processing time.
+- **API Usage**: Be mindful of your API usage, as processing multiple files or using the chat history feature can quickly consume your quota.
+
+## 🛠️ Future Improvements
+
+- Implement built-in token limiting to prevent API overuse.
+- Add multi-threading for improved UI responsiveness during processing.
+- Expand model options and fine-tune existing integrations.
+- Implement error handling for API failures and network issues.
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
