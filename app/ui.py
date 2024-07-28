@@ -27,45 +27,9 @@ class ChatbotUI(QMainWindow):
         self.processing_multiple_files = False
 
         # Aesthetics
-        self.setStyleSheet("""
-            QMainWindow {
-                background-color: #f0f0f0; /* Lighter background for the main window */
-                font-family: 'Segoe UI'; /* Modern font */
-            }
-            QPushButton {
-                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #E0E0E0, stop:1 #FFFFFF);
-                color: #333;
-                border: 1px solid #aaa;
-                padding: 10px;
-                border-radius: 5px;
-                font-weight: bold;
-                text-transform: uppercase;
-            }
-            QPushButton:hover {
-                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #FFFFFF, stop:1 #E0E0E0);
-                border-color: #888;
-            }
-            QPushButton:pressed {
-                background-color: #E0E0E0;
-            }
-            QComboBox {
-                background-color: #fff;
-                color: #333;
-                border: 1px solid #aaa;
-                border-radius: 3px;
-                padding: 5px;
-                min-width: 6em;
-                font-family: 'Segoe UI'; /* Consistent font */
-            }
-            QTextEdit, QScrollArea {
-                background-color: #fff;
-                color: #333;
-                border: 1px solid #aaa;
-                border-radius: 3px;
-                padding: 5px; /* Slightly increased padding for better text visibility */
-                font-family: 'Segoe UI'; /* Consistent font */
-            }
-        """)
+        stylesheet_path = os.path.join(os.path.dirname(__file__), 'styles.qss')
+        with open(stylesheet_path, 'r') as f:
+            self.setStyleSheet(f.read())
 
 
         # Developer and Model selection
