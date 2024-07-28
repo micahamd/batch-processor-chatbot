@@ -46,6 +46,7 @@ class ChatbotUI(QMainWindow):
         # Prompt input
         self.prompt_input = QTextEdit()
         self.prompt_input.setPlaceholderText("Enter your prompt here...")
+        self.prompt_input.setObjectName("prompt_input") 
         layout.addWidget(self.prompt_input)
 
         # Include chat history
@@ -53,14 +54,16 @@ class ChatbotUI(QMainWindow):
         layout.addWidget(self.include_history_checkbox)
 
         # Add context directory
+        context_layout = QHBoxLayout()
         self.add_context_checkbox = QCheckBox("Add Context")
         self.add_context_checkbox.stateChanged.connect(self.toggle_context_button)
-        layout.addWidget(self.add_context_checkbox)
+        context_layout.addWidget(self.add_context_checkbox)
         
         self.context_button = QPushButton("Context Directory")
         self.context_button.clicked.connect(self.select_context_directory)
         self.context_button.setVisible(False)
-        layout.addWidget(self.context_button)
+        context_layout.addWidget(self.context_button)
+        layout.addLayout(context_layout)
 
         # Directory selection
         dir_layout = QHBoxLayout()
@@ -92,6 +95,7 @@ class ChatbotUI(QMainWindow):
         # Output display
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setObjectName("output_area") 
         self.output_widget = QWidget()
         self.output_layout = QVBoxLayout()
         self.output_widget.setLayout(self.output_layout)
@@ -113,6 +117,8 @@ class ChatbotUI(QMainWindow):
         self.selected_directory = None
         self.directory_files = []
         self.current_file_index = 0
+        self.context_files = []
+        self.context_directory = None
 
     def toggle_context_button(self, state):
         self.context_button.setVisible(state == Qt.CheckState.Checked.value)
@@ -130,7 +136,7 @@ class ChatbotUI(QMainWindow):
     def select_directory(self):
         self.selected_directory = QFileDialog.getExistingDirectory(self, "Select Directory")
         if self.selected_directory:
-            self.directory_files = [f for f in os.listdir(self.selected_directory) if os.path.isfile(os.path.join(self.selected_directory, f)) and f.lower().endswith(('.txt', '.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
+            self.directory_files = [f for f in os.listdir(self.selected_directory) if os.path.isfile(os.path.join(self.selected_directory, f)) and f.lower().endswith(('.txt', '.pdf','.html', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
             self.current_file_index = 0
             self.dir_label.setText(f"Directory Selected: {len(self.directory_files)} files")
         else:
@@ -141,10 +147,11 @@ class ChatbotUI(QMainWindow):
     def select_context_directory(self):
         self.context_directory = QFileDialog.getExistingDirectory(self, "Select Context Directory")
         if self.context_directory:
-            self.context_files = [f for f in os.listdir(self.context_directory) if os.path.isfile(os.path.join(self.context_directory, f)) and f.lower().endswith(('.txt', '.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
+            self.context_files = [f for f in os.listdir(self.context_directory) if os.path.isfile(os.path.join(self.context_directory, f)) and f.lower().endswith(('.txt', '.pdf','.html', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
             self.context_button.setText(f"Context Directory: {len(self.context_files)} files")
         else:
             self.context_files = []
+            self.context_directory = None
             self.context_button.setText("Select Context Directory")
         
     def process_request(self):
@@ -162,8 +169,8 @@ class ChatbotUI(QMainWindow):
         chat_history = self.chat_history if self.include_history_checkbox.isChecked() else None
         
         context_files = None
-        if self.add_context_checkbox.isChecked() and self.context_files:
-            context_files = [os.path.join(self.context_directory, f) for f in self.context_files]        
+        if self.add_context_checkbox.isChecked() and self.context_directory and self.context_files:
+            context_files = [os.path.join(self.context_directory, f) for f in self.context_files]      
  
         if self.selected_directory and self.directory_files:
             self.progress_bar.setVisible(True)

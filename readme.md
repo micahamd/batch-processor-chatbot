@@ -1,15 +1,15 @@
-# 🚀 Multimodal Chatbot
+# 🚀 Multimodal Chatbot integrating OpenAI, Anthropic and Google models
 
-A Multimodal Chatbot capable of deploying models from ChatGPT, Claude, and Gemini in a single interface. The model can process text, images (with vision-capable models), documents, and audio (with whisper-1 only), and generate text and images (using Dall-E). You can additionally batch process multiple files with a given prompt, and save the output in HTML. 
+A Multimodal Chatbot capable of deploying models from ChatGPT, Claude, and Gemini in a single interface. The model can process text, images (with vision-capable models), documents, and audio (with whisper-1 only). The model generates text and images (using Dall-E) in a chat window display that can be saved as an HTML file. Features include multi-file batch processing, selective inclusion of the prior chat history in the prompt, and the optional inclusion of a context directory.   
 
 ## 🌟 Features
 
-- 🤖 Implements ChatGPT, Claude, and Gemini models (at present)
-- 📄 Support for various document file types (DOCX, PDF, PPT), images, spreadsheets (XLS, CSV), audio
-- 📁 Batch processing multiple files from a user-provided directory
-- 💬 Chat history integration
+- 🤖 Implements ChatGPT, Claude, and Gemini models (at present). Additional developers/models can be included in the processor.py file. 
+- 📄 Support for various document file types (DOCX, PDF, PPT, HTML), images, spreadsheets (XLS, CSV), audio.
+- 📁 Batch process multiple files from a user-provided directory.
+- 💬 Optional chat history integration into context window
 - 💾 Save conversations as HTML
-- 🧠 Context-aware processing with optional context directory
+- 🧠 Include context files from a different user-provided directory.
 
 ## 🛠️ Installation
 
@@ -33,6 +33,7 @@ A Multimodal Chatbot capable of deploying models from ChatGPT, Claude, and Gemin
 4. Set up your API keys:
    Create a `.env` file in the project root and add your API keys:
    ```
+   PYTHONPATH=${PYTHONPATH}:${PWD}  # References the current value of the PYTHONPATH environment variable if it isn't already set
    OPENAI_API_KEY=your_openai_api_key
    ANTHROPIC_API_KEY=your_anthropic_api_key
    GOOGLE_API_KEY=your_google_api_key
@@ -40,64 +41,61 @@ A Multimodal Chatbot capable of deploying models from ChatGPT, Claude, and Gemin
 
 ## 🚀 Usage
 
-Run the application:
+Run the application from the terminal:
 ```
 python main.py
 ```
 
-## 🎯 How to Interact with the Agent
+## 🎯 Interacting with the Agent
 
-1. **Select AI Model**: 
-   - Choose the developer (ChatGPT, Claude, or Gemini) from the dropdown menu. Then choose the specific model version. These can be updated directly in the 'processor.py' file.
+1. **Switch between AI Models in the same session**: 
+   - Choose the developer (ChatGPT, Claude, or Gemini) from the dropdown menu. Then choose a model specific to the developer. These can be updated in the 'ui.py' file (see 'update_model_options' metho).
 
-2. **Enter Your Prompt**:
+2. **Prompt Entry**:
    - Type your question or instruction in the text box, as you would in a conventional chatbot UI.
 
 3. **Include Chat History**:
-   - Check the "Include Chat History?" box if you want the chatbot to consider previous interactions (involving text/images) displayed in the chatbox. Note that the latter *only* records the agent's responses, and your earlier instructions will not be taken into consideration. 
-
-4. **Add Context** (New Feature):
-   - Check the "Add Context" box to enable context-aware processing.
-   - Click the "Select Context Directory" button to choose a folder containing context files.
-   - The chatbot will incorporate the content of these files into its processing.
-
-5. **Process Files**:
-   - Click "Toggle Directory" to select a folder of files to process.
-   - The agent has been tested on complex PDFs, Word documents, and images in the current iteration. 
-   - *Caution* Be aware of token limits when processing complex PDFs with several images.
-
-6. **Start Processing**:
-   - Hit the "Process" button to send your request to the selected AI. *DO NOT* interact with the application while it's processing your request as it runs on your main thread for security reasons. The speed of the response is contingent on the quality of your internet connection. 
-
-7. **Review Output**:
+   - Check the "Include Chat History?" box if you want the chatbot to consider previous interactions (involving text/images) displayed in the chatbox. Note that the latter *only* records the agent's responses, in conjunction with the instructions in the prompt window. 
    - Scroll through the chat window to see the AI's responses. Any images will be displayed inline with the text.
 
-8. **Save Your Conversation**:
+4. **Add Context**:
+   - Check the "Add Context" box to reveal a button for selecting a context directory.
+   - Clicking in this will allow the user to choose a folder containing context files. *All* files in the the context folder will be processed simultaneously. You can unselect the "Add Context" box to remove the context from the interaction.
+  
+5. **Batch Process**:
+   - Click "Toggle Directory" to select a folder containing files that you want to batch process. All files in the batch process folder will be iteratively processed in conjunction with the provided prompt and, when available, the chat history and context files.
+   - The agent has been tested on complex PDFs, Word documents, and images.  
+   - *Caution* Be aware of token limits when processing complex PDFs with several images. For large files, Gemini Flash is the most capable.
+
+6. **Start Processing**:
+   - Hit the "Process" button to send your request to the selected AI. *DO NOT* interact with the application while it's processing your request as it runs on your main thread for security reasons. The speed of the response is contingent on the quality of your internet connection. To terminate the process, hit Ctrl+C on your terminal window. 
+
+7. **Save Your Conversation**:
    - Click "Save Output" to store the entire chat history as an HTML file.
 
-9. **Start Fresh**:
+8. **Start Fresh**:
    - Use the "Clear Window" button to reset the chat and start a new conversation.
 
-## 💡 Usage Tips
+## 💡 Useage Tips
 
 - For single/multiple files that you want to input, create a directory and direct the agent there.
-- When processing documents, ask specific questions about the content, e.g., "Summarize the main points of this report."
-- Experiment with different AI models for your workflow. As of July 7, 2024, Claude 3.5 appears useful for most use cases, GPT is good for image generation and audio transcription, and Gemini for its immense context window. 
+- Experiment with different AI models for your workflow. 
 - Use the chat history feature for more context-aware conversations.
-- Leverage the new "Add Context" feature for processing that requires additional background information.
+- Leverage the "Add Context" feature for processing that requires additional background information.
+- Context window limits vary by developer and model. Ensure to check the documentation of each developer to identify current context/model limits.
 
 ## ⚠️ Important Notes
 
-- **Token Limits**: The application currently does not have built-in token limiters. Users must be cautious about the amount of data they process, especially with large files or extensive chat histories. If you need to implement token limits, you'll need to modify the code in the 'processor.py' file for each AI service.
-- **Performance**: The application processes requests on the main thread. For large files or batch processing, expect the UI to be unresponsive until processing is complete.
+- **Token Limits**: The application currently does not have built-in token limiters. Be cautious about the amount of data you process, especially with large files or extensive chat histories. If you need to implement token limits, you'll need to modify the code in the 'processor.py' file for each AI service.
+- **Performance**: The application processes requests on the main thread. For large files or batch processing, expect the UI to be unresponsive until processing is complete. This can be manually terminated from the terminal by hitting 'Ctrl+C'.
 - **File Compatibility**: While the chatbot supports various file types, complex files (especially PDFs with many images) may cause issues due to token limits or processing time.
 - **API Usage**: Be mindful of your API usage, as processing multiple files or using the chat history feature can quickly consume your quota.
 
-## 🛠️ Future Improvements
+## 🛠️ Future Enhancements
 
-- Implement built-in token limiting to prevent API overuse.
+- Integrate with Ollama to run locally installed models.
 - Add multi-threading for improved UI responsiveness during processing.
-- Expand model options and fine-tune existing integrations.
+- Expand file output options.
 - Implement error handling for API failures and network issues.
 
 ## 📄 License
