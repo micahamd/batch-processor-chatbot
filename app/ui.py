@@ -136,7 +136,7 @@ class ChatbotUI(QMainWindow):
     def select_directory(self):
         self.selected_directory = QFileDialog.getExistingDirectory(self, "Select Directory")
         if self.selected_directory:
-            self.directory_files = [f for f in os.listdir(self.selected_directory) if os.path.isfile(os.path.join(self.selected_directory, f)) and f.lower().endswith(('.txt', '.pdf','.html', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
+            self.directory_files = [f for f in os.listdir(self.selected_directory) if os.path.isfile(os.path.join(self.selected_directory, f)) and not f.startswith('~$') and f.lower().endswith(('.txt', '.pdf','.html', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
             self.current_file_index = 0
             self.dir_label.setText(f"Directory Selected: {len(self.directory_files)} files")
         else:
@@ -147,7 +147,8 @@ class ChatbotUI(QMainWindow):
     def select_context_directory(self):
         self.context_directory = QFileDialog.getExistingDirectory(self, "Select Context Directory")
         if self.context_directory:
-            self.context_files = [f for f in os.listdir(self.context_directory) if os.path.isfile(os.path.join(self.context_directory, f)) and f.lower().endswith(('.txt', '.pdf','.html', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
+            self.context_files = [f for f in os.listdir(self.context_directory) if os.path.isfile(os.path.join(self.context_directory, f)) and not f.startswith('~$') and f.lower().endswith(('.txt', '.pdf','.html', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
+            print("Context Files:", self.context_files) # List context files in terminal
             self.context_button.setText(f"Context Directory: {len(self.context_files)} files")
         else:
             self.context_files = []

@@ -1,6 +1,6 @@
 
 # Chapter writing pipeline
-## Chapter summary by individual page:
+# Chapter summary by individual page:
 
 Please process this page from a chapter on [], which part of a textbook on []. Your task is to summarize this content in a manner comprehensible and digestible to undergraduate students. Your content should comprise of the following:
 
@@ -16,33 +16,7 @@ Summary: (500-600 words)
 Key Concepts: (2-3)
 References: (1-2)
 ***
-
-## Follow up on Chat History to integrate summaries into chapter  (unselect Directory)
-
-You are an excellent and proficient educator with a extensive background in Psychology. You have been tasked to write a textbook based on the attached summaries. Each summary you read represents the content of an individual page. Your task is to integrate these summaries into a cohesive, informative and self-contained module for presentation in Markdown. Please review the page summaries carefully, synthesizing across common ideas as needed. Because many pages identify similar key concepts, integrate across them when you're constructing your chapter. I permit you to have full freedom in constructing the chapter, using the knowledge contained in the summaries above.  Ensure your chapter is at least 6000 words in total, and never less than 5000 words. 
-
-I have provided a general guideline for you to follow when constructing the chapter:
-
-1. Chapter title (main header)
-2. Chapter summary (~300 words)
-3. Key concepts to be introduced (8-10, each with a ~50 word elaboration)
-4. Components (4-5) - these will include
-	- Component subheading
-        - Textbook content, presented in an engaging way that relates to the other sub-components and the chapter overall (~1000 words each)
-        - Component conclusion (wrap up the content neatly, and prepare the reader for the upcoming component)
-5. Conclusion (~400 words)
-6. References
-7. 4-5 image prompts for DALL-E 3 inside square brackets. These should be simple and relevant for the chapter. 
-8. The overall output should never be less than 5000 words.
-9. Double-check your response for rendundancies before output. 
-10. Given the short word count (for a chapter), be as informatively rich as possible in the chapter. Be concise, objective and logical - do not utilize any superflous or pedantic terms.
-
-Given your limits, it is understandable that you will not be able to produce an entire chapter's worth of content from all the summaries provided. This is why you can place markers inside square brackets. You can state something to the effect of "[EXPAND ON TOPIC]", where the "TOPIC" is inferred from your output. Place these markers besides content that would be worth elaborating on in a later re-edit. Ensure to clearly place these throughout your response as needed, and number them. For example, "[1. EXPAND ON TOPIC]", "[2. EXPAND ON TOPIC]", and so on.     
-
-===
-===
-
-[Prompt for generating lectures from slides]
+# Generate lectures from slides
 
 **Prompt for GPT:**
 
@@ -85,5 +59,48 @@ You will be processing a PDF file containing a lecture on [insert specific topic
 
 **Final Note:**
 Please ensure your transcript not only reflects the information from the slides but also conveys it in a manner that is engaging and easy to understand for the target audience. 
+# Generate Forum Discussions and 16 Quiz questions (for PS205)
+
+[Place transcript in context window, and produce the following prompt]
+
+This is the week's lecture transcript. Please process this carefully, and output the following:
+
+1. A short (<50 words) forum discussion point based on the provided transcript. This should be a simple instruction, directly addressed to the students, that asks them to explore a particular topic/relation from the previous week's lecture. This should be related to the transcript, and encourage self-reflection. It should also be structured in a way that the instructor need not necessarily respond to the discussion. Note that each forum discussion is only worth 1% of the student's grade, so the expected response will be quite brief (<100 words). Please ensure your forum discussion point meets these criteria.
+
+2. Generate 12 multiple choice quizzes (4 options each) and 4 true/false items, so a total of 16 test items. Please markthe correct answer for each test item, and justify why that answer was correct relative to the remaining options under each test item. Please ensure that the questions are well-constructed, and pertain directly to the provided transcript.
+
+# QOT assessment from Lecture transcript
+
+[Use gemini flash. Place QOT document in context, and lecture transcript in batch directory]
+
+---
+
+You are a Learning Observer tasked with evaluating a lecture based on the criteria listed. Your output should respond to each of the items in the Quality of Teaching Classroom Observation Checklist based on the transcript you assess. 
+
+Specifically, your output should provide good scores for each of the components described. Elaborate the final remarks appropriately, being concise and favorable. The final remark should conclude with a recommendation for promotion based on teaching quality.
+
+--
+
+[Unselect Context and Batch Directory, then select Chat History and include the following prompt]
+
+--
+
+You have been provided a Classroom Observation Checklist, completed for the evaluation of Mr. Orban.
+
+I would like you to re-organize this content, without omitting anything. 
+
+You'll note the separate headings marked out in MD format, using '###'. Under each header, there are individual queries, and single sentence responses to those queries. I want you to parse all the responses to all individual queries under each header into a single, brief and comprehensive paragraph that addresses all the points. You can leave the score for each section as is. Your output should therefore be structured as:
+
+---
+
+`### Header
+
+{Paragraph summarizing remarls}
+
+Point score (X out of X)
+
+---
 
 
+
+ 
