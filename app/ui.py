@@ -133,10 +133,17 @@ class ChatbotUI(QMainWindow):
         elif developer == "Gemini":
             self.model_combo.addItems(["gemini-1.5-flash-001", "gemini-1.5-pro-001", "gemini-1.0-pro-vision-001"])
 
+    def get_filtered_files(self, directory):
+        # Takes a directory path as input and returns a list of files in that directory that are not temporary files (do not start with '~$') and have specific extensions.
+        return [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and not f.startswith('~$') and f.lower().endswith(('.txt', '.pdf', '.html', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
+
     def select_directory(self):
+        # Opens a dialog for the user to select a directory. If a directory is selected, it filters the files using 'get_filtered_files' and updates the 'directory_files'
+        # and 'current_file_index' attributes. It also updates the 'dir_label' to show the number of files selected. To unselect a directory, open the dialog option again and
+        # press 'Cancel'
         self.selected_directory = QFileDialog.getExistingDirectory(self, "Select Directory")
         if self.selected_directory:
-            self.directory_files = [f for f in os.listdir(self.selected_directory) if os.path.isfile(os.path.join(self.selected_directory, f)) and not f.startswith('~$') and f.lower().endswith(('.txt', '.pdf','.html', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
+            self.directory_files = self.get_filtered_files(self.selected_directory)
             self.current_file_index = 0
             self.dir_label.setText(f"Directory Selected: {len(self.directory_files)} files")
         else:
@@ -145,17 +152,20 @@ class ChatbotUI(QMainWindow):
             self.dir_label.setText("No Directory Selected")
 
     def select_context_directory(self):
+        # Similar to 'select_directory', this also opens a dialog for the user to select a context directory. If a directory is selected, files are filtered using 'get_filtered_files'.
+        # The 'context_files' and 'context_directory' attributes are updated. Unlike the 'select_directory' method, all files in the context directory are processed simultaneously.
         self.context_directory = QFileDialog.getExistingDirectory(self, "Select Context Directory")
         if self.context_directory:
-            self.context_files = [f for f in os.listdir(self.context_directory) if os.path.isfile(os.path.join(self.context_directory, f)) and not f.startswith('~$') and f.lower().endswith(('.txt', '.pdf','.html', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
-            print("Context Files:", self.context_files) # List context files in terminal
+            self.context_files = self.get_filtered_files(self.context_directory)
+            print("Context Files:", self.context_files)  # List context files in terminal
             self.context_button.setText(f"Context Directory: {len(self.context_files)} files")
         else:
             self.context_files = []
             self.context_directory = None
             self.context_button.setText("Select Context Directory")
-        
+
     def process_request(self):
+        # Takes a request object, processes it, and sends the request to the API.
         self.processing_multiple_files = bool(self.selected_directory and self.directory_files) # Flag html output generator
 
         developer = self.developer_combo.currentText()
