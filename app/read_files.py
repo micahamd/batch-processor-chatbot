@@ -32,22 +32,37 @@ def read_document(file_path):
     except Exception as e:
         raise IOError(f"Error reading document {file_path}: {str(e)}")
 
+def process_image(image_bytes):
+    try:
+        image = Image.open(BytesIO(image_bytes))
+        if image.mode in ['CMYK', 'RGBA', 'P','L','LA']:
+            image = image.convert('RGB')
+
+        # Compress image to JPEG (as PNGs are lossless and token-heavy)
+        buffered = BytesIO()
+        image.save(buffered, format="JPEG", quality=50)  # Adjust quality as needed
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        return img_str
+    except Exception as e:
+        print(f"Error processing image: {str(e)}")
+        return None    
+
 def read_word_document(file_path):
     doc = Document(file_path)
     content = []
     images = []
 
     for para in doc.paragraphs:
-        content.append(para.text)
+        text = para.text.strip()
+        if text:
+            content.append(para.text)
 
     for rel in doc.part.rels.values():
         if "image" in rel.target_ref:
             image_data = rel.target_part.blob
-            image = Image.open(BytesIO(image_data))
-            buffered = BytesIO()
-            image.save(buffered, format="PNG")
-            img_str = base64.b64encode(buffered.getvalue()).decode()
-            images.append(img_str)
+            img_str = process_image(image_data)
+            if img_str:
+                images.append(img_str)
 
     return "\n".join(content), images
 
@@ -57,28 +72,17 @@ def read_pdf_document(file_path):
     images = []
 
     for page in doc:
-        # Extract and clean text to remove trailing spaces and newlines
-        text = page.get_text().strip()
+        text = page.get_text().strip() # Extract and clean text to remove trailing spaces and newlines
         if text:
             content.append(text)
         
-        # Extract and compress images in JPEG format
         for img in page.get_images(full=True):
             xref = img[0]
             base_image = doc.extract_image(xref)
             image_bytes = base_image["image"]
-            try:
-                image = Image.open(BytesIO(image_bytes))
-                if image.mode == 'CMYK' or image.mode == 'RGBA': # Convert to RGB as JPEGs doin't have a transparency alpha channel
-                    image = image.convert('RGB')
-
-                # Compress image
-                buffered = BytesIO()
-                image.save(buffered, format="JPEG", quality=50)  # Adjust quality as needed
-                img_str = base64.b64encode(buffered.getvalue()).decode()
+            img_str = process_image(image_bytes)
+            if img_str:
                 images.append(img_str)
-            except Exception as e:
-                print(f"Error processing image in PDF: {str(e)}")
 
     return "\n".join(content), images
 
@@ -93,14 +97,12 @@ def read_powerpoint_document(file_path):
             if hasattr(shape, 'text'):
                 slide_content.append(shape.text)
             if shape.shape_type == 13:  # MSO_SHAPE_TYPE.PICTURE
-                image = shape.image
-                image_bytes = image.blob
-                image = Image.open(BytesIO(image_bytes))
-                buffered = BytesIO()
-                image.save(buffered, format="PNG")
-                img_str = base64.b64encode(buffered.getvalue()).decode()
-                images.append(img_str)
-        content.append("\n".join(slide_content))
+                image_bytes = shape.image.blob
+                img_str = process_image(image_bytes)
+                if img_str:
+                    images.append(img_str)
+        if slide_content:
+            content.append("\n".join(slide_content))
 
     return "\n".join(content), images
 
