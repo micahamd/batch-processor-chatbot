@@ -34,18 +34,24 @@ def read_document(file_path):
 
 def process_image(image_bytes):
     try:
+        # Open the image from bytes
         image = Image.open(BytesIO(image_bytes))
-        if image.mode in ['CMYK', 'RGBA', 'P','L','LA']:
+        
+        # Convert image to RGB if necessary
+        if image.mode in ['CMYK', 'RGBA', 'P', 'L', 'LA', 'RGBX', 'RGBa', 'YCbCr']:
+            if image.mode == 'P' and 'transparency' in image.info:
+                image = image.convert('RGBA')
             image = image.convert('RGB')
 
-        # Compress image to JPEG (as PNGs are lossless and token-heavy)
+        # Compress image to JPEG
         buffered = BytesIO()
         image.save(buffered, format="JPEG", quality=50)  # Adjust quality as needed
+        
+        # Encode the image to base64
         img_str = base64.b64encode(buffered.getvalue()).decode()
         return img_str
     except Exception as e:
-        print(f"Error processing image: {str(e)}")
-        return None    
+        return None
 
 def read_word_document(file_path):
     doc = Document(file_path)
@@ -94,9 +100,9 @@ def read_powerpoint_document(file_path):
     for slide in prs.slides:
         slide_content = []
         for shape in slide.shapes:
-            if hasattr(shape, 'text'):
-                slide_content.append(shape.text)
-            if shape.shape_type == 13:  # MSO_SHAPE_TYPE.PICTURE
+            if shape.has_text_frame:
+                slide_content.append(shape.text_frame.text)
+            if shape.shape_type == 13:
                 image_bytes = shape.image.blob
                 img_str = process_image(image_bytes)
                 if img_str:
