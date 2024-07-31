@@ -57,17 +57,24 @@ def read_pdf_document(file_path):
     images = []
 
     for page in doc:
-        content.append(page.get_text())
-        for img in page.get_images():
+        # Extract and clean text to remove trailing spaces and newlines
+        text = page.get_text().strip()
+        if text:
+            content.append(text)
+        
+        # Extract and compress images in JPEG format
+        for img in page.get_images(full=True):
             xref = img[0]
             base_image = doc.extract_image(xref)
             image_bytes = base_image["image"]
             try:
                 image = Image.open(BytesIO(image_bytes))
-                if image.mode == 'CMYK':
+                if image.mode == 'CMYK' or image.mode == 'RGBA': # Convert to RGB as JPEGs doin't have a transparency alpha channel
                     image = image.convert('RGB')
+
+                # Compress image
                 buffered = BytesIO()
-                image.save(buffered, format="PNG")
+                image.save(buffered, format="JPEG", quality=50)  # Adjust quality as needed
                 img_str = base64.b64encode(buffered.getvalue()).decode()
                 images.append(img_str)
             except Exception as e:
