@@ -135,7 +135,10 @@ class ChatbotUI(QMainWindow):
 
     def get_filtered_files(self, directory):
         # Takes a directory path as input and returns a list of files in that directory that are not temporary files (do not start with '~$') and have specific extensions.
-        return [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and not f.startswith('~$') and f.lower().endswith(('.txt', '.pdf', '.html', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
+        filtered_files =  [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and not f.startswith('~$') and f.lower().endswith(('.txt', '.pdf', '.html', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
+        print(f"Filtered files: {filtered_files}")  # Debug statement
+        return filtered_files
+
 
     def select_directory(self):
         # Opens a dialog for the user to select a directory. If a directory is selected, it filters the files using 'get_filtered_files' and updates the 'directory_files'
