@@ -2,7 +2,7 @@
 
 A Multimodal Chatbot capable of deploying models from ChatGPT, Claude, and Gemini in a single interface. The model can process text, images (with vision-capable models), documents, and audio (with whisper-1 only). The model generates text and images (using Dall-E) in a chat window display that can be saved as an HTML file. Features include multi-file batch processing, selective inclusion of the prior chat history in the prompt, and the optional inclusion of a context directory.   
 
-## 🌟 Features
+## 🌟 Features 
 
 - 🤖 Implements ChatGPT, Claude, and Gemini models (at present). Additional developers/models can be included in the processor.py file. 
 - 📄 Support for various document file types (DOCX, PDF, PPT, HTML), images, spreadsheets (XLS, CSV), audio.
@@ -78,24 +78,25 @@ python main.py
 
 ## 💡 Useage Tips
 
-- For single/multiple files that you want to input, create a directory and direct the agent there.
-- Experiment with different AI models for your workflow. 
-- Use the chat history feature for more context-aware conversations.
-- Leverage the "Add Context" feature for processing that requires additional background information.
-- Context window limits vary by developer and model. Ensure to check the documentation of each developer to identify current context/model limits.
+- For single/multiple files that you want to input, create a directory and direct the agent there. 
+- I recommend having two folders called 'context_files' and 'batch_files'. Populate these in accordance with your needs.
+- Experiment with different AI models in the same session to leverage each one's strengths. 
+- (Optional) Select the chat history feature to incorporate earlier responses from the chat session into the prompt.
+- (Optional) Select the "Add Context" feature, then a directory for including additional files into your prompt (tested with documents and images only). This can direct to the 'context_files' folder. Note that *all* files in the context directory will be processed simultaneously.
+- (Optional) Use the "Select Directory" button to identify the directory for batch processing. The prompt (incl. chat history + context if you choose) will be applied to each file incrementally in the 'batch_files' directory that you would have created.
 
 ## ⚠️ Important Notes
 
-- **Token Limits**: The application currently does not have built-in token limiters. Be cautious about the amount of data you process, especially with large files or extensive chat histories. If you need to implement token limits, you'll need to modify the code in the 'processor.py' file for each AI service.
+- **Token Limits**: The application currently does not have built-in token limiters. Be cautious about the amount of data you process, especially with large files or extensive chat histories. You can set token limits in the 'processor.py' file for each AI service.
 - **Performance**: The application processes requests on the main thread. For large files or batch processing, expect the UI to be unresponsive until processing is complete. This can be manually terminated from the terminal by hitting 'Ctrl+C'.
-- **File Compatibility**: While the chatbot supports various file types, complex files (especially PDFs with many images) may cause issues due to token limits or processing time.
-- **API Usage**: Be mindful of your API usage, as processing multiple files or using the chat history feature can quickly consume your quota.
+- **File Compatibility**: The file types the chatbot currently supports is always expanding. Text and image processing has been successfully tested.
+- **API Usage**: Be mindful of your API usage, as processing multiple files or using the chat history feature can quickly consume your token quota. 
 
 ## 🛠️ Future Enhancements
 
-- Integrate with Ollama to run locally installed models.
+- Integrate with Ollama to run locally installed models offline.
 - Add multi-threading for improved UI responsiveness during processing.
-- Expand file output options.
+- Keep expanding file input/output options.
 - Implement error handling for API failures and network issues.
 
 ## 📄 License
