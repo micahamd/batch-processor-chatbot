@@ -1,5 +1,6 @@
 import os
 import base64
+import io
 from io import BytesIO
 from docx import Document
 from pptx import Presentation
@@ -32,25 +33,33 @@ def read_document(file_path):
     except Exception as e:
         raise IOError(f"Error reading document {file_path}: {str(e)}")
 
-def process_image(image_bytes):
+def process_image(image_path_or_bytes, preserve_original=False):
     try:
-        # Open the image from bytes
-        image = Image.open(BytesIO(image_bytes))
+        # Open the image from file path or bytes
+        if isinstance(image_path_or_bytes, str):
+            image = Image.open(image_path_or_bytes)
+        else:
+            image = Image.open(io.BytesIO(image_path_or_bytes))
         
-        # Convert image to RGB if necessary
-        if image.mode in ['CMYK', 'RGBA', 'P', 'L', 'LA', 'RGBX', 'RGBa', 'YCbCr']:
-            if image.mode == 'P' and 'transparency' in image.info:
-                image = image.convert('RGBA')
-            image = image.convert('RGB')
+        if not preserve_original:
+            # Convert image to RGB if necessary
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
 
-        # Compress image to JPEG
-        buffered = BytesIO()
-        image.save(buffered, format="JPEG", quality=50)  # Adjust quality as needed
+            # Resize the image if it's too large
+            max_size = (1280, 720)  # 720p
+            image.thumbnail(max_size, Image.LANCZOS)
+
+        # Save the image to a byte stream
+        buffered = io.BytesIO()
+        image.save(buffered, format="JPEG" if not preserve_original else image.format, quality=85)
         
         # Encode the image to base64
         img_str = base64.b64encode(buffered.getvalue()).decode()
+        
         return img_str
     except Exception as e:
+        print(f"Error processing image: {str(e)}")
         return None
 
 def read_word_document(file_path):

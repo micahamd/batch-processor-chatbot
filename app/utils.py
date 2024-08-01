@@ -49,8 +49,15 @@ def read_context_files(file_paths):
     context_content = []
     for file_path in file_paths:
         try:
-            content, _ = read_file(file_path)
-            context_content.append(f"Content of {os.path.basename(file_path)}:\n{content}\n")
+            if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+                image = Image.open(file_path)
+                buffered = BytesIO()
+                image.save(buffered, format="PNG")
+                img_str = base64.b64encode(buffered.getvalue()).decode()
+                context_content.append(f"Image file: {os.path.basename(file_path)}\nFormat: {image.format}, Size: {image.size}, Mode: {image.mode}\nBase64: {img_str[:20]}...")
+            else:
+                content, _ = read_file(file_path)
+                context_content.append(f"Content of {os.path.basename(file_path)}:\n{content}\n")
         except Exception as e:
             context_content.append(f"Error reading {os.path.basename(file_path)}: {str(e)}\n")
     return "\n".join(context_content)
