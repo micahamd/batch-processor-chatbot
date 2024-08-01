@@ -2,7 +2,7 @@ import os
 import base64
 from PIL import Image
 from io import BytesIO
-from app.read_files import read_document, read_spreadsheet
+from app.read_files import read_document, read_spreadsheet, process_image
 
 MAX_FILE_SIZE = 100 * 1024 * 1024  # 100 MB limit, can be adjusted
 
@@ -30,31 +30,28 @@ def read_file(file_path, max_file_size=MAX_FILE_SIZE):
 
 def read_image_file(file_path):
     try:
-        img = Image.open(file_path)
-        buffered = BytesIO()
-        img.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue()).decode()
-        return f"Image file: {file_path}\nFormat: {img.format}, Size: {img.size}, Mode: {img.mode}", [img_str]
+        with open(file_path, "rb") as image_file:
+            image_bytes = image_file.read()
+        img_str = process_image(image_bytes)  # Use process image to standardize image types
+        if img_str:
+            return f"Image file: {file_path}", [img_str]
+        else:
+            return f"Failed to process image file: {file_path}", []
     except Exception as e:
         raise IOError(f"Error processing image file {file_path}: {str(e)}")
-
-def encode_image(image_path):
-    try:
-        with open(image_path, "rb") as image_file:
-            return base64.b64encode(image_file.read()).decode('utf-8')
-    except Exception as e:
-        raise IOError(f"Error encoding image {image_path}: {str(e)}")
 
 def read_context_files(file_paths):
     context_content = []
     for file_path in file_paths:
         try:
             if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
-                image = Image.open(file_path)
-                buffered = BytesIO()
-                image.save(buffered, format="PNG")
-                img_str = base64.b64encode(buffered.getvalue()).decode()
-                context_content.append(f"Image file: {os.path.basename(file_path)}\nFormat: {image.format}, Size: {image.size}, Mode: {image.mode}\nBase64: {img_str[:20]}...")
+                with open(file_path, "rb") as image_file:
+                    image_bytes = image_file.read()
+                img_str = process_image(image_bytes)
+                if img_str:
+                    context_content.append(f"Image file: {os.path.basename(file_path)}\nBase64: {img_str[:20]}...")
+                else:
+                    context_content.append(f"Failed to process image file: {os.path.basename(file_path)}")
             else:
                 content, _ = read_file(file_path)
                 context_content.append(f"Content of {os.path.basename(file_path)}:\n{content}\n")

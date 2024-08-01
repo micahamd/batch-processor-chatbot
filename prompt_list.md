@@ -46,33 +46,32 @@ Your response should be structured in a manner that can be directly copied to R 
 [Place lecture notes inside context window]
 
 You are an esteemed academic editor, well-versed in the construction and editing of academic textbooks. You have been provided the outline of a chapter for a psychology textbook. Please review the entire outline carefully. 
-
 You will note that the outline is divided in the following manner (please look inside parentheses for extra comments):
- ---
+`---
 Module overview:
 Sub-module (there are several of these, each with their own sub-sections)
- - Introduction
- - Key concepts
- - Interesting tidbit
- Key Takeaways
- Glossary
- ---
+- Introduction
+- Key concepts
+- Interesting tidbit
+Key Takeaways
+Glossary
+`---
 
+The content for each sub-module should smoothly transition into the latter. These should be thoughtful, engaging, non-overlapping and informative. Your output should be structured as follows:
 
- The content for each sub-module should smoothly transition into the latter. These should be thoughtful, engaging, non-overlapping and informative. Your output should be structured as follows:
-
-
- ---
- Sub-Module : XX (this can be the title from the outline)
- Introduction: (At least 800 words: this can be divided into 2-3 further sub-modules if deemed necessary)
- ---
+`---
+Sub-Module : XX (this can be the title from the outline)
+Introduction: (At least 800 words: this can be divided into 2-3 further sub-modules if deemed necessary)
+`---
 Repeat this for as many sub-modules as there are in the uploaded document.  After you have gone through all sub-modules, please list all the key concepts that are provided in the text, integrating/dropping rendundant definitions as needed.
 
+# Develop tutorial transcripts from lecture transcripts
 
-# Expand on chapter content
+Can you please generate a lecture based on the transcript below? This should be readable via teleprompter, and go beyond what is discussed in the transcript. Ensure the content you generate does not replicate the transcript, but elaborates and expands on it. Structure your output into individual paragraphs, corresponding to individual slides. Elaborate on the points, and incorporate examples of real-life situations from the Pacific. Please ensure to keep the entire talk to under an hour. Please incorporate time-stamps as needed. Ensure that the lecture is engaging, formal and contrarian. 
 
-Please carefully review this c
+[with chat history]
 
+Here is a lecture transcript. Please review this carefully, and populate the sections inside parentheses with the instructions provided. Yo u should ouput this transcript verbatim, only updating the sections inside the parentheses
 # Generate lectures from slides
 
 **Prompt for GPT:**
@@ -158,7 +157,6 @@ Point score (X out of X)
 ---
 
 
-
 # US Grant Application
 
 [Load incomplete application in the Context Window]
@@ -182,3 +180,14 @@ Program Activities:
 - Increase cooperation with Pacific Islands on climate and other global environmental issues, and foster more healthy, educated, and resilient populations.
 - Advance more inclusive and sustainable growth and promote free and fair trade and transparent investment that improve lives of Americans and people around the world.
 - Strengthen the efficacy and inclusivity of democratic institutions and support a resilient, viable civil society and independent media.
+
+# Respond to Forum Discussions PS205
+
+You are a teaching assistant for a course on Cognitive Psychology. You are evaluating student responses to a forum discussion point:
+
+"Share your thoughts on what "cognition" means to you. Describe an everyday example where multiple components of your cognition (attention, perception, problem-solving, memory, etc.) intersect to guide your behavior."
+
+You will evaluate and respond to each student directly, intermittently using their name. Keep your responses brief (<50 words>), formal, informative and engaging. Try not to repeat feedback to students. Gently correct any misconceptions that may arise. Acknowledge any examples provided, elaborating on them if required. Remember to keep your responses brief, encouraging and reflective of a formal lecturer. Each response is only worth 1%, so your evaluation should be brief. 
+
+Please structure your output as follows:
+Student name: Respose to Student

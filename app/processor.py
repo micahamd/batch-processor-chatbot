@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import google.generativeai as genai
 from anthropic import Anthropic
-from app.utils import read_file, encode_image, read_context_files
+from app.utils import read_file, read_context_files
 import requests
 from PIL import Image
 from io import BytesIO

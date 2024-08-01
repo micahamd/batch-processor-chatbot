@@ -42,8 +42,20 @@ def process_image(image_path_or_bytes, preserve_original=False):
             image = Image.open(io.BytesIO(image_path_or_bytes))
         
         if not preserve_original:
-            # Convert image to RGB if necessary
-            if image.mode != 'RGB':
+            # Convert image based on its mode
+            if image.mode in ['RGBA', 'LA']:
+                # Images with alpha channel
+                background = Image.new('RGBA', image.size, (255, 255, 255))
+                background.paste(image, mask=image.split()[3])  # 3 is the alpha channel
+                image = background.convert('RGB')
+            elif image.mode == 'P':
+                # Palette images
+                image = image.convert('RGBA')
+                background = Image.new('RGBA', image.size, (255, 255, 255))
+                background.paste(image, mask=image.split()[3])
+                image = background.convert('RGB')
+            elif image.mode != 'RGB':
+                # All other modes (grayscale, CMYK, YCbCr, etc.)
                 image = image.convert('RGB')
 
             # Resize the image if it's too large
@@ -52,7 +64,7 @@ def process_image(image_path_or_bytes, preserve_original=False):
 
         # Save the image to a byte stream
         buffered = io.BytesIO()
-        image.save(buffered, format="JPEG" if not preserve_original else image.format, quality=85)
+        image.save(buffered, format="JPEG", quality=85)
         
         # Encode the image to base64
         img_str = base64.b64encode(buffered.getvalue()).decode()
@@ -62,34 +74,16 @@ def process_image(image_path_or_bytes, preserve_original=False):
         print(f"Error processing image: {str(e)}")
         return None
 
-def read_word_document(file_path):
-    doc = Document(file_path)
-    content = []
-    images = []
-
-    for para in doc.paragraphs:
-        text = para.text.strip()
-        if text:
-            content.append(para.text)
-
-    for rel in doc.part.rels.values():
-        if "image" in rel.target_ref:
-            image_data = rel.target_part.blob
-            img_str = process_image(image_data)
-            if img_str:
-                images.append(img_str)
-
-    return "\n".join(content), images
-
 def read_pdf_document(file_path):
     doc = fitz.open(file_path)
     content = []
     images = []
 
     for page in doc:
-        text = page.get_text().strip() # Extract and clean text to remove trailing spaces and newlines
-        if text:
-            content.append(text)
+        text = page.get_text("blocks")
+        for block in text:
+            if block[6] == 0:  # If it's a text block
+                content.append(block[4].strip())
         
         for img in page.get_images(full=True):
             xref = img[0]
@@ -99,27 +93,68 @@ def read_pdf_document(file_path):
             if img_str:
                 images.append(img_str)
 
-    return "\n".join(content), images
+    return "\n\n".join(content), images
+
+def read_word_document(file_path):
+    doc = Document(file_path)
+    content = []
+    images = []
+
+    for para in doc.paragraphs:
+        if para.text.strip():
+            content.append(para.text.strip())
+
+    for rel in doc.part.rels.values():
+        if "image" in rel.target_ref:
+            image_part = rel.target_part
+            image_bytes = image_part.blob
+            img_str = process_image(image_bytes)
+            if img_str:
+                images.append(img_str)
+
+    return "\n\n".join(content), images
 
 def read_powerpoint_document(file_path):
     prs = Presentation(file_path)
     content = []
     images = []
+    slide_count = len(prs.slides)
 
-    for slide in prs.slides:
+    content.append(f"PowerPoint presentation with {slide_count} slides.")
+
+    for i, slide in enumerate(prs.slides, start=1):
         slide_content = []
         for shape in slide.shapes:
-            if shape.has_text_frame:
-                slide_content.append(shape.text_frame.text)
-            if shape.shape_type == 13:
+            if hasattr(shape, 'text') and shape.text.strip():
+                # Limit text to first 100 characters per shape
+                slide_content.append(shape.text.strip()[:100])
+            if shape.shape_type == 13:  # Picture
                 image_bytes = shape.image.blob
-                img_str = process_image(image_bytes)
-                if img_str:
-                    images.append(img_str)
-        if slide_content:
-            content.append("\n".join(slide_content))
+                try:
+                    # Use process_image function
+                    processed_image = process_image(image_bytes)
+                    if processed_image:
+                        images.append(processed_image)
+                        slide_content.append("[Image]")
+                except Exception as e:
+                    print(f"Error processing image in slide {i}: {str(e)}")
 
-    return "\n".join(content), images
+        # Summarize slide content
+        if slide_content:
+            summary = f"Slide {i}: " + " | ".join(slide_content)
+            content.append(summary[:200])  # Limit each slide summary to 200 characters
+
+        # Only process notes if they exist and are non-empty
+        if slide.has_notes_slide and slide.notes_slide.notes_text_frame.text.strip():
+            notes = slide.notes_slide.notes_text_frame.text.strip()
+            content.append(f"Notes for Slide {i}: {notes[:100]}")  # Limit notes to 100 characters
+
+    # Limit total content to 2000 characters
+    full_content = "\n".join(content)
+    if len(full_content) > 2000:
+        full_content = full_content[:1997] + "..."
+
+    return full_content, images
 
 def read_rtf_document(file_path):
     # RTF reading is complex and requires a dedicated library
