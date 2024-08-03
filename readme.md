@@ -1,10 +1,10 @@
-# 🚀 Multimodal Chatbot integrating OpenAI, Anthropic and Google models
+# 🚀 Multimodal Chatbot integrating OpenAI, Anthropic, Google and Mistral models
 
-A Multimodal Chatbot capable of deploying models from ChatGPT, Claude, and Gemini in a single interface. The model can process text, images (with vision-capable models), documents, and audio (with whisper-1 only). The model generates text and images (using Dall-E) in a chat window display that can be saved as an HTML file. Features include multi-file batch processing, selective inclusion of the prior chat history in the prompt, and the optional inclusion of a context directory.   
+A Multimodal Chatbot capable of deploying models from ChatGPT, Claude, Gemini and Mistral in a single interface. The model can process text, images (with vision-capable models), documents, and audio (with whisper-1 only). The model generates text and images (using Dall-E) in a chat window display that can be saved as an HTML file. Features include multi-file batch processing, selective inclusion of the prior chat history in the prompt, and the optional inclusion of a context directory.   
 
 ## 🌟 Features 
 
-- 🤖 Implements ChatGPT, Claude, and Gemini models (at present). Additional developers/models can be included in the processor.py file. 
+- 🤖 Implements ChatGPT, Claude, Gemini and Mistral models (at present). Additional developers/models can be included in the processor.py file. 
 - 📄 Support for various document file types (DOCX, PDF, PPT, HTML), images, spreadsheets (XLS, CSV), audio.
 - 📁 Batch process multiple files from a user-provided directory.
 - 💬 Optional chat history integration into context window
@@ -37,6 +37,7 @@ A Multimodal Chatbot capable of deploying models from ChatGPT, Claude, and Gemin
    OPENAI_API_KEY=your_openai_api_key
    ANTHROPIC_API_KEY=your_anthropic_api_key
    GOOGLE_API_KEY=your_google_api_key
+   MISTRAL_API_KEY=your_mistral_api_key
    ```
 
 ## 🚀 Usage
@@ -79,8 +80,9 @@ python main.py
 ## 💡 Useage Tips
 
 - For single/multiple files that you want to input, create a directory and direct the agent there. 
-- I recommend having two folders called 'context_files' and 'batch_files'. Populate these in accordance with your needs.
+- I recommend having two folders called 'context_files' and 'batch_files' in the app directory. 
 - Experiment with different AI models in the same session to leverage each one's strengths. 
+- Models that aren't multimodal skip images and process only the text (Mistral). 
 - (Optional) Select the chat history feature to incorporate earlier responses from the chat session into the prompt.
 - (Optional) Select the "Add Context" feature, then a directory for including additional files into your prompt (tested with documents and images only). This can direct to the 'context_files' folder. Note that *all* files in the context directory will be processed simultaneously.
 - (Optional) Use the "Select Directory" button to identify the directory for batch processing. The prompt (incl. chat history + context if you choose) will be applied to each file incrementally in the 'batch_files' directory that you would have created.
