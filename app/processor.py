@@ -4,11 +4,15 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import google.generativeai as genai
 from anthropic import Anthropic
+from mistralai.client import MistralClient
+from mistralai.models.chat_completion import ChatMessage
 from app.utils import read_file, read_context_files
+from app.read_files import read_document
 import requests
 from PIL import Image
 from io import BytesIO
 from .read_files import process_image # Pre-process all images into JPG format
+
 
 load_dotenv()
 
@@ -30,6 +34,8 @@ def process_request(developer, model, prompt, file_path, chat_history=None, cont
         return process_claude(model, prompt, file_path, chat_history, context_files)
     elif developer == "Gemini":
         return process_gemini(model, prompt, file_path, chat_history, context_files)
+    elif developer == "Mistral":
+        return process_mistral(model, prompt, file_path, chat_history, context_files)        
     else:
         return "Invalid developer selected"
 
@@ -328,3 +334,52 @@ def process_gemini(model, prompt, file_path, chat_history=None, context_files=No
     
     except Exception as e:
         return f"Error processing request: {str(e)}"    
+    
+def process_mistral(model, prompt, file_path, chat_history=None, context_files=None):
+    client = MistralClient(api_key=os.getenv("MISTRAL_API_KEY"))
+    
+    messages = []
+    
+    # Include chat history
+    if chat_history:
+        for item_type, item_content in chat_history:
+            if item_type == "text":
+                messages.append(ChatMessage(role="user", content=item_content))
+    
+    # Add context files
+    if context_files:
+        context_message = "Context Files:\n"
+        for context_file in context_files:
+            try:
+                if not context_file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+                    file_content = read_file(context_file)
+                    context_message += f"Content of context file {os.path.basename(context_file)}:\n{file_content}\n\n"
+                else:
+                    context_message += f"[An image file was provided: {os.path.basename(context_file)}]\n"
+            except Exception as e:
+                context_message += f"Error reading context file {os.path.basename(context_file)}: {str(e)}\n"
+        context_message += "End of Context Files\n"
+        messages.append(ChatMessage(role="user", content=context_message))
+    
+    # Process file if provided
+    if file_path:
+        try:
+            if not file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+                file_content = read_file(file_path)
+                messages.append(ChatMessage(role="user", content=f"Here's the content of the file {os.path.basename(file_path)}:\n\n{file_content}\n\nPlease analyze this content based on the given prompt."))
+            else:
+                messages.append(ChatMessage(role="user", content=f"[An image file was provided: {os.path.basename(file_path)}]"))
+        except Exception as e:
+            return f"Error processing file {file_path}: {str(e)}"
+    
+    # Add the user's prompt
+    messages.append(ChatMessage(role="user", content=f"Prompt:\n{prompt}"))
+    
+    try:
+        response = client.chat(
+            model=model,
+            messages=messages
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        return f"Error processing request: {str(e)}"

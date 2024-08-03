@@ -35,7 +35,7 @@ class ChatbotUI(QMainWindow):
         # Developer and Model selection
         dev_model_layout = QHBoxLayout()
         self.developer_combo = QComboBox()
-        self.developer_combo.addItems(["ChatGPT", "Claude", "Gemini"])
+        self.developer_combo.addItems(["ChatGPT", "Claude", "Gemini", "Mistral"])
         self.developer_combo.currentIndexChanged.connect(self.update_model_options)
         dev_model_layout.addWidget(self.developer_combo)
         self.model_combo = QComboBox()
@@ -132,13 +132,14 @@ class ChatbotUI(QMainWindow):
             self.model_combo.addItems(["claude-3-5-sonnet-20240620", "claude-3-opus-20240229", "claude-3-haiku-20240307"])
         elif developer == "Gemini":
             self.model_combo.addItems(["gemini-1.5-flash-001", "gemini-1.5-pro-001", "gemini-1.0-pro-vision-001"])
+        elif developer == "Mistral":
+            self.model_combo.addItems(["open-mistral-nemo", "mistral-large-latest","codestral-2405","mistral-embed"])    
 
     def get_filtered_files(self, directory):
         # Takes a directory path as input and returns a list of files in that directory that are not temporary files (do not start with '~$') and have specific extensions.
         filtered_files =  [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and not f.startswith('~$') and f.lower().endswith(('.txt', '.pdf', '.html', '.doc', '.docx','.ppt','.pptx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.mp3', '.wav', '.ogg', '.m4a'))]
         print(f"Filtered files: {filtered_files}")  # Debug statement
         return filtered_files
-
 
     def select_directory(self):
         # Opens a dialog for the user to select a directory. If a directory is selected, it filters the files using 'get_filtered_files' and updates the 'directory_files'
