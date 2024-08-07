@@ -26,7 +26,7 @@ def read_document(file_path):
             return read_rtf_document(file_path)
         elif ext == '.odt':
             return read_odt_document(file_path)
-        elif ext in ['.txt', '.md', '.html', '.htm']:
+        elif ext in ['.txt', '.md', '.html', '.htm','.py','.rmd']:
             return read_text_document(file_path)
         else:
             raise ValueError(f"Unsupported document format: {ext}")

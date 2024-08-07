@@ -1,6 +1,6 @@
 
 # Academic book prompt
-## Chapter summary by individual page:
+# Chapter summary by individual page:
 
 Please process this page from a chapter on [], which part of a textbook on []. Your task is to summarize this content in a manner comprehensible and digestible to undergraduate students. Your content should comprise of the following:
 
@@ -17,7 +17,7 @@ Key Concepts: (2-3)
 References: (1-2)
 ***
 ---
-## Chapter template generation from page summaries (continue from above)
+# Chapter template generation from page summaries (continue from above)
 
 [After all pages have been processed, unselect the Directory and select Chat History. Then provide the following prompt]
 
@@ -39,7 +39,6 @@ Your response should be structured in a manner that can be directly copied to R 
 **References and Further Reading** (2-3 references for students to follow up on, based on earlier content)
 
 ---
-
 
 ## Chapter elaboration from template
 
@@ -64,7 +63,6 @@ Sub-Module : XX (this can be the title from the outline)
 Introduction: (At least 800 words: this can be divided into 2-3 further sub-modules if deemed necessary)
 `---
 Repeat this for as many sub-modules as there are in the uploaded document.  After you have gone through all sub-modules, please list all the key concepts that are provided in the text, integrating/dropping rendundant definitions as needed.
-
 # Develop tutorial transcripts from lecture transcripts
 
 Can you please generate a lecture based on the transcript below? This should be readable via teleprompter, and go beyond what is discussed in the transcript. Ensure the content you generate does not replicate the transcript, but elaborates and expands on it. Structure your output into individual paragraphs, corresponding to individual slides. Elaborate on the points, and incorporate examples of real-life situations from the Pacific. Please ensure to keep the entire talk to under an hour. Please incorporate time-stamps as needed. Ensure that the lecture is engaging, formal and contrarian. 
@@ -155,8 +153,6 @@ You'll note the separate headings marked out in MD format, using '###'. Under ea
 Point score (X out of X)
 
 ---
-
-
 # US Grant Application
 
 [Load incomplete application in the Context Window]
@@ -180,8 +176,8 @@ Program Activities:
 - Increase cooperation with Pacific Islands on climate and other global environmental issues, and foster more healthy, educated, and resilient populations.
 - Advance more inclusive and sustainable growth and promote free and fair trade and transparent investment that improve lives of Americans and people around the world.
 - Strengthen the efficacy and inclusivity of democratic institutions and support a resilient, viable civil society and independent media.
-
 # Respond to Forum Discussions PS205
+
 
 You are a teaching assistant for a course on Cognitive Psychology. You are evaluating student responses to a forum discussion point:
 
@@ -191,3 +187,27 @@ You will evaluate and respond to each student directly, intermittently using the
 
 Please structure your output as follows:
 Student name: Respose to Student
+# Enhance lecture transcript
+
+
+[Place slides and lectures in context window]
+
+You are an expert psychologist with decades of teaching experience. You are tasked with updating and refining earlier lectures, from earlier transcripts. 
+
+Please carefully review the lecture transcript entirely. You will note that the lecture is sectioned into [] number of slides. The transcript aligns with those slides. Ensure that your output also aligns with the slides. Sometimes the slides may be provided as well, which you can use for additional guidance.
+
+You will refine, update and improve the lecture without omitting any content. You will re-generate the lecture with time stamps, ensuring that your presented sequence aligns with original lecture. You must ensure that the lecture is engaging, and that all the examples provided are retained.
+
+[If there are additional parts]
+
+The first [] slides of the lecture transcript are complete. You do not have to repeat this. This has been attached for you to peruse only. Please construct and organize the transcript for the remaining slides, using the raw lecture content below. Imagine this as continuing the lecture you have in your context.
+
+# Generate tutorial notes from lecture transcript
+
+[Place transcript in context folder]
+
+Please review this lecture transcript carefully. The lecture accompanies a slide presentation, and should be demarcated in the transcript. After carefully reviewing the transcript, I would like you to generate a new presentation, in markdown format, based on the transcript. 
+
+This transcript will be for a tutorial that accompanies the lecture, and builds on the examples and materials provided. Based on this knowledge, please generate a new presentation. Your output should include time stamps. Section your output under slide headers, similar to the lecture transcript. These sections should transition smoothly onto each other. Under each header, a single, continuous paragraph of content should be placed. Ensure that none of paragraphs present redundant information.
+
+Conclude your presentation with a brief conclusion, and a list of key points covered, with definitions. The presentation should be no more than 40 minutes. All sections should be clearly demarcated for easy reading via teleprompter.
